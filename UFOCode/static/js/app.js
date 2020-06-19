@@ -1,59 +1,61 @@
-// Follow pseudocode flow!
-// Variables for d3 
-let button = d3.select("#filter-btn");
-let inputField1 = d3.select("#datetime");
-let inputField2 = d3.select("#city");
+// Variables for table, filter, reset and tbody
+let tableData = data;
+let filter = d3.select("#filter-btn");
+let reset = d3.select("#reset-btn");
 let tbody = d3.select("tbody");
-let resetbtn = d3.select("#reset-btn");
-let columns = ["datetime", "city", "state", "country", "shape", "durationMinutes", "comments"]
-//for using to populate table
-let populate = (dataInput) => {
 
-  dataInput.forEach(ufo_sightings => {
-    let row = tbody.append("tr");
-    columns.forEach(column => row.append("td").text(ufo_sightings[column])
-    )
-  });
+//Funtion to populate the table
+function renderTable(ufoDatas) {
+	ufoDatas.forEach(datas => {
+		let row = tbody.append("tr");
+		Object.values(datas).forEach(value =>{
+        let cell = row.append("td");
+        cell.text(value);
+	});
+	});	
 }
 
-//Populate table with data
-populate(data);
+// Function for Filter the table
+function filterTableBotton() {
+	
+	d3.event.preventDefault();
+	// set input variables
+	let searchDate = d3.select("#datetime").property("value");
+	let searchCity = d3.select("#city").property("value");
+	let searchState = d3.select("#state").property("value");
+	let searchCountry = d3.select("#country").property("value");
+	let searchShape = d3.select("#shape").property("value");
 
-// Filter by attribute
-button.on("click", () => {
-  d3.event.preventDefault();
-  let inputDate = inputField1.property("value").trim();
-  let inputCity = inputField2.property("value").toLowerCase().trim();
-  // Filter by field matching input value
-
-  let filterDate = data.filter(data => data.datetime === inputDate);
-  console.log(filterDate)
-  let filterCity = data.filter(data => data.city === inputCity);
-  console.log(filterCity)
-  let filterData = data.filter(data => data.datetime === inputDate && data.city === inputCity);
-  console.log(filterData)
-
-  // Add filtered sighting to table
-  tbody.html("");
-  //ES6
-  let response = {
-    filterData, filterCity, filterDate
-  }
-
-  if (response.filterData.length !== 0) {
-    populate(filterData);
-  }
-    else if (response.filterData.length === 0 && ((response.filterCity.length !== 0 || response.filterDate.length !== 0))){
-      populate(filterCity) || populate(filterDate);
-  
+	let filteredDatas = data;
+  // filter searches matching input value variables
+	if (searchDate != ""){
+    	filteredDatas = filteredDatas.filter(filterdata => filterdata.datetime === searchDate);
     }
-    else {
-      tbody.append("tr").append("td").text("No results found!"); 
+    // city, state, country and shape have to be lower case
+    if (searchCity !=""){
+    	filteredDatas = filteredDatas.filter(filterdata => filterdata.city.toLowerCase() === searchCity.toLowerCase());
     }
-})
+    if (searchState !=""){
+        filteredDatas = filteredDatas.filter(filterdata => filterdata.state.toLowerCase() === searchState.toLowerCase());
+        }
+    if (searchCountry !=""){
+        filteredDatas = filteredDatas.filter(filterdata => filterdata.country.toLowerCase() === searchCountry.toLowerCase());
+        }
+    if (searchShape !=""){
+        filteredDatas = filteredDatas.filter(filterdata => filterdata.shape.toLowerCase() === searchShape.toLowerCase());
+        }
+    //add filtered sighting
+    tbody.html(" ");
+    renderTable(filteredDatas);
+}
 
-resetbtn.on("click", () => {
-  tbody.html("");
-  populate(data)
-  console.log("Table reset")
-})
+//Reset button
+function resetTableBotton() {
+	tbody.html(" ");
+	renderTable(tableData);
+}
+
+//Get filtered Table
+renderTable(tableData);
+filter.on("click", filterTableBotton );
+reset.on("click", resetTableBotton );
